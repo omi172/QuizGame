@@ -31,12 +31,6 @@ public class UserService implements UserDetailsService {
         return userRepository.existsByEmail(email);
     }
 
-    /**
-     * Registers a user with the role they selected at signup (ADMIN or
-     * PARTICIPANT), per this project's spec. Unlike a typical public app,
-     * self-service admin selection is an intentional requirement here -
-     * see the note in RegisterRequest/register.html for the tradeoff.
-     */
     public User registerUser(RegisterRequest request) {
         Role role;
         try {
