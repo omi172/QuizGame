@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="${quiz.title}">Take Quiz</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <h2 th:text="${quiz.title}">Quiz Title</h2>
+    <div id="timer">Time remaining: <span id="timeDisplay">--:--</span></div>
+
+    <form id="quizTakeForm">
+        <div th:each="question, qStat : ${questions}" class="question-block">
+            <p><strong th:text="${qStat.count} + '. ' + ${question.text}">Question text</strong></p>
+            <div th:each="option : ${question.options}" class="option-row">
+                <input type="radio" th:name="${question.id}" th:value="${option.id}"
+                       th:id="${question.id} + '_' + ${option.id}"/>
+                <label th:for="${question.id} + '_' + ${option.id}" th:text="${option.text}">Option text</label>
+            </div>
+        </div>
+        <button type="button" class="btn" id="submitBtn">Submit Quiz</button>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    const quizId = /*[[${quiz.id}]]*/ '';
+    let secondsLeft = /*[[${quiz.timeLimitSeconds}]]*/ 60;
+    const timeDisplay = document.getElementById('timeDisplay');
+    let submitted = false;
+
+    function formatTime(s) {
+        const m = Math.floor(s / 60).toString().padStart(2, '0');
+        const sec = (s % 60).toString().padStart(2, '0');
+        return m + ':' + sec;
+    }
+
+    timeDisplay.textContent = formatTime(secondsLeft);
+    const timerInterval = setInterval(() => {
+        secondsLeft--;
+        timeDisplay.textContent = formatTime(Math.max(secondsLeft, 0));
+        if (secondsLeft <= 0) {
+            clearInterval(timerInterval);
+            submitQuiz(); // time's up - auto-submit whatever is answered
+        }
+    }, 1000);
+
+    function collectAnswers() {
+        const form = document.getElementById('quizTakeForm');
+        const groups = {};
+        new FormData(form).forEach((value, key) => { groups[key] = value; });
+        return Object.entries(groups).map(([questionId, selectedOptionId]) => ({ questionId, selectedOptionId }));
+    }
+
+    function submitQuiz() {
+        if (submitted) return;
+        submitted = true;
+        clearInterval(timerInterval);
+
+        fetch(`/quiz/${quizId}/submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quizId, answers: collectAnswers() })
+        })
+        .then(res => res.text())
+        .then(redirectPath => { window.location.href = redirectPath; })
+        .catch(err => alert('Could not submit quiz: ' + err));
+    }
+
+    document.getElementById('submitBtn').addEventListener('click', submitQuiz);
+</script>
+</body>
+</html>

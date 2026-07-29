@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Manage Quizzes</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <h2>Manage Quizzes</h2>
+    <a class="btn" th:href="@{/admin/quizzes/new}">+ New Quiz</a>
+
+    <div th:each="quiz : ${quizzes}" class="quiz-card">
+        <h3 th:text="${quiz.title}">Quiz Title</h3>
+        <p th:text="${quiz.description}">Description</p>
+        <p>Time limit: <span th:text="${quiz.timeLimitSeconds}">60</span>s ·
+           Questions: <span th:text="${#lists.size(quiz.questions)}">5</span></p>
+        <a th:href="@{/admin/quizzes/{id}/edit(id=${quiz.id})}">Edit</a> ·
+        <a th:href="@{/admin/quizzes/{id}/results(id=${quiz.id})}">View Results</a> ·
+        <form th:action="@{/admin/quizzes/{id}/delete(id=${quiz.id})}" method="post" style="display:inline">
+            <button type="submit" class="link-button" style="color:#dc2626;" onclick="return confirm('Delete this quiz?')">Delete</button>
+        </form>
+    </div>
+    <p th:if="${#lists.isEmpty(quizzes)}">No quizzes yet — create one to get started.</p>
+</div>
+</body>
+</html>

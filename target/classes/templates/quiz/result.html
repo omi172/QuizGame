@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Quiz Result</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <div class="card" style="max-width:500px;margin:40px auto;text-align:center;">
+        <h2 th:text="${quiz.title}">Quiz Title</h2>
+        <p style="font-size:2rem;font-weight:700;">
+            <span th:text="${attempt.score}">3</span> / <span th:text="${attempt.totalQuestions}">5</span>
+        </p>
+        <p>Submitted at <span th:text="${attempt.submittedAt}">2026-07-29T10:00:00Z</span></p>
+        <a class="btn" th:href="@{/quiz/list}">Back to quizzes</a>
+    </div>
+</div>
+</body>
+</html>

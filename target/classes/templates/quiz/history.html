@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>My Attempts</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <h2>My Attempts</h2>
+    <table>
+        <thead><tr><th>Quiz ID</th><th>Score</th><th>Submitted</th><th></th></tr></thead>
+        <tbody>
+        <tr th:each="a : ${attempts}">
+            <td th:text="${a.quizId}">quiz1</td>
+            <td th:text="${a.score} + ' / ' + ${a.totalQuestions}">3 / 5</td>
+            <td th:text="${a.submittedAt}">2026-07-29T10:00:00Z</td>
+            <td><a th:href="@{/quiz/result/{id}(id=${a.id})}">View</a></td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(attempts)}">You haven't taken any quizzes yet.</p>
+</div>
+</body>
+</html>

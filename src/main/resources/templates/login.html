@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Login - Quiz App</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <div class="card" style="max-width:400px;margin:40px auto;">
+        <h2>Login</h2>
+        <p class="error" th:if="${loginError}" th:text="${loginError}"></p>
+        <p class="error" th:if="${param.error}">Invalid username or password.</p>
+        <p class="success" th:if="${param.registered}">Registration successful — please log in.</p>
+        <p class="success" th:if="${param.logout}">You've been logged out.</p>
+
+        <form class="stacked" th:action="@{/login}" method="post">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required/>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required/>
+
+            <button class="btn" type="submit">Login</button>
+        </form>
+        <p style="margin-top:16px;">Don't have an account? <a th:href="@{/register}">Register</a>.</p>
+    </div>
+</div>
+</body>
+</html>

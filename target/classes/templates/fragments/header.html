@@ -1,0 +1,24 @@
+<header th:fragment="header" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <nav class="navbar">
+        <a class="brand" th:href="@{/}">📝 Quiz App</a>
+        <div class="nav-links">
+            <span sec:authorize="hasRole('PARTICIPANT')">
+                <a th:href="@{/quiz/list}">Take a Quiz</a>
+                <a th:href="@{/quiz/history}">My Attempts</a>
+            </span>
+            <span sec:authorize="hasRole('ADMIN')">
+                <a th:href="@{/admin/quizzes}">Manage Quizzes</a>
+                <a th:href="@{/admin/quizzes/new}">New Quiz</a>
+            </span>
+            <span sec:authorize="!isAuthenticated()">
+                <a th:href="@{/login}">Login</a>
+                <a th:href="@{/register}">Register</a>
+            </span>
+            <span sec:authorize="isAuthenticated()">
+                <form th:action="@{/logout}" method="post" style="display:inline">
+                    <button type="submit" class="link-button">Logout (<span sec:authentication="name">user</span>)</button>
+                </form>
+            </span>
+        </div>
+    </nav>
+</header>

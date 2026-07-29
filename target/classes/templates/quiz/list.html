@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Available Quizzes</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <h2>Available Quizzes</h2>
+    <div th:each="quiz : ${quizzes}" class="quiz-card">
+        <h3 th:text="${quiz.title}">Quiz Title</h3>
+        <p th:text="${quiz.description}">Description</p>
+        <p>Time limit: <span th:text="${quiz.timeLimitSeconds}">60</span>s ·
+           Questions: <span th:text="${#lists.size(quiz.questions)}">5</span></p>
+        <a class="btn" th:href="@{/quiz/{id}/take(id=${quiz.id})}">Take Quiz</a>
+    </div>
+    <p th:if="${#lists.isEmpty(quizzes)}">No quizzes available right now.</p>
+</div>
+</body>
+</html>

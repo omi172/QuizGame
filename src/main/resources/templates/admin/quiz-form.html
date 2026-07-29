@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Quiz Form</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container">
+    <h2 th:text="${quizDto.id} != null ? 'Edit Quiz' : 'New Quiz'">Quiz Form</h2>
+    <p class="error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+
+    <form class="stacked" id="quizForm"
+          th:action="${quizDto.id} != null ? @{/admin/quizzes/{id}(id=${quizDto.id})} : @{/admin/quizzes}"
+          th:object="${quizDto}" method="post">
+
+        <label for="title">Title</label>
+        <input type="text" id="title" th:field="*{title}" required/>
+        <p class="error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+
+        <label for="description">Description</label>
+        <textarea id="description" th:field="*{description}" rows="2"></textarea>
+
+        <label for="timeLimitSeconds">Time limit (seconds)</label>
+        <input type="number" id="timeLimitSeconds" th:field="*{timeLimitSeconds}" min="10" required/>
+        <p class="error" th:if="${#fields.hasErrors('timeLimitSeconds')}" th:errors="*{timeLimitSeconds}"></p>
+
+        <h3 style="margin-top:24px;">Questions</h3>
+        <div id="questionsContainer">
+            <div class="question-block" th:each="question, qStat : *{questions}">
+                <label>Question text</label>
+                <input type="text" th:field="*{questions[__${qStat.index}__].text}" required/>
+
+                <div th:each="option, oStat : ${question.options}" class="option-row">
+                    <input type="radio"
+                           th:name="|questions[${qStat.index}].correctOptionIndex|"
+                           th:value="${oStat.index}"
+                           th:checked="${option.correct}"
+                           th:attr="onclick=|markCorrect(${qStat.index}, ${oStat.index})|"/>
+                    <input type="text" th:field="*{questions[__${qStat.index}__].options[__${oStat.index}__].text}"
+                           placeholder="Option text" required style="flex:1;"/>
+                    <input type="hidden" th:field="*{questions[__${qStat.index}__].options[__${oStat.index}__].correct}"
+                           th:id="|correct_${qStat.index}_${oStat.index}|"/>
+                </div>
+                <button type="button" class="btn btn-secondary" onclick="addOption(this)"
+                        th:attr="data-qindex=${qStat.index}">+ Add option</button>
+                <button type="button" class="btn btn-danger" onclick="removeQuestion(this)">Remove question</button>
+            </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="addQuestionBtn">+ Add question</button>
+        <br/>
+        <button class="btn" type="submit">Save Quiz</button>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    let questionIndex = /*[[${#lists.size(quizDto.questions)}]]*/ 1;
+
+    function markCorrect(qIndex, selectedOIndex) {
+        const block = document.querySelectorAll('.question-block')[qIndex];
+        const hiddenInputs = block.querySelectorAll('input[type=hidden][id^="correct_' + qIndex + '_"]');
+        hiddenInputs.forEach((input, i) => { input.value = (i === selectedOIndex); });
+    }
+
+    function addOption(btn) {
+        const qIndex = btn.getAttribute('data-qindex');
+        const block = btn.closest('.question-block');
+        const oIndex = block.querySelectorAll('.option-row').length;
+
+        const row = document.createElement('div');
+        row.className = 'option-row';
+        row.innerHTML = `
+            <input type="radio" name="questions[${qIndex}].correctOptionIndex" value="${oIndex}"
+                   onclick="markCorrect(${qIndex}, ${oIndex})"/>
+            <input type="text" name="questions[${qIndex}].options[${oIndex}].text" placeholder="Option text" required style="flex:1;"/>
+            <input type="hidden" name="questions[${qIndex}].options[${oIndex}].correct" id="correct_${qIndex}_${oIndex}" value="false"/>
+        `;
+        block.insertBefore(row, btn);
+    }
+
+    function removeQuestion(btn) {
+        const container = document.getElementById('questionsContainer');
+        if (container.children.length > 1) {
+            btn.closest('.question-block').remove();
+        } else {
+            alert('A quiz needs at least one question.');
+        }
+    }
+
+    document.getElementById('addQuestionBtn').addEventListener('click', () => {
+        const container = document.getElementById('questionsContainer');
+        const qIndex = questionIndex++;
+
+        const block = document.createElement('div');
+        block.className = 'question-block';
+        block.innerHTML = `
+            <label>Question text</label>
+            <input type="text" name="questions[${qIndex}].text" required/>
+            <div class="option-row">
+                <input type="radio" name="questions[${qIndex}].correctOptionIndex" value="0"
+                       onclick="markCorrect(${qIndex}, 0)"/>
+                <input type="text" name="questions[${qIndex}].options[0].text" placeholder="Option text" required style="flex:1;"/>
+                <input type="hidden" name="questions[${qIndex}].options[0].correct" id="correct_${qIndex}_0" value="false"/>
+            </div>
+            <div class="option-row">
+                <input type="radio" name="questions[${qIndex}].correctOptionIndex" value="1"
+                       onclick="markCorrect(${qIndex}, 1)"/>
+                <input type="text" name="questions[${qIndex}].options[1].text" placeholder="Option text" required style="flex:1;"/>
+                <input type="hidden" name="questions[${qIndex}].options[1].correct" id="correct_${qIndex}_1" value="false"/>
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="addOption(this)" data-qindex="${qIndex}">+ Add option</button>
+            <button type="button" class="btn btn-danger" onclick="removeQuestion(this)">Remove question</button>
+        `;
+        container.appendChild(block);
+    });
+</script>
+</body>
+</html>
