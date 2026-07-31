@@ -1,5 +1,6 @@
 package com.quizapp.controller;
 
+import com.quizapp.dto.LoginRequest;
 import com.quizapp.dto.RegisterRequest;
 import com.quizapp.security.JwtUtil;
 import com.quizapp.service.UserService;
@@ -49,7 +50,8 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(Model model) {
+        model.addAttribute("loginRequest", new LoginRequest());
         return "login";
     }
 
